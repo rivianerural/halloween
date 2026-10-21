@@ -9,6 +9,7 @@ export default function PainelClient({ eventos }) {
   const [erro, setErro] = useState('');
   const [filtro, setFiltro] = useState('abertas');
   const [agora, setAgora] = useState(Date.now());
+  const [aberta, setAberta] = useState(null);
 
   async function carregar() {
     try {
@@ -76,13 +77,23 @@ export default function PainelClient({ eventos }) {
             const st = status(s, agora);
             const prazo = prazoDe(s);
             const c = contagem(prazo.getTime() - agora);
-            const titulo = s.travessura !== null
-              ? TRAVESSURAS[s.travessura]?.titulo
-              : [s.opcao_1, s.opcao_2].filter((v) => v !== null).map((v) => TRAVESSURAS[v]?.titulo).join(' ou ');
+            const indices = s.travessura !== null ? [s.travessura] : [s.opcao_1, s.opcao_2].filter((v) => v !== null);
+            const titulo = indices.map((v) => TRAVESSURAS[v]?.titulo).join(' ou ');
+            const verDetalhe = aberta === s.id;
+            // Enquanto não escolhe, deixa claro em que ponto do sorteio a pessoa parou.
+            const andamento = s.travessura !== null ? ''
+              : s.opcao_2 === null ? 'Sorteou 1 de 2: ainda pode confirmar essa ou sortear de novo.'
+              : 'Sorteou 2 de 2: falta escolher qual das duas vai pagar.';
             return (
               <div className="linha" key={s.id}>
                 <div className="who"><b>{s.pessoa}</b><span>{nomeEvento(s.evento)}</span></div>
-                <div className="t">{titulo}</div>
+                <div className="t">
+                  <button className="t-btn" aria-expanded={verDetalhe} aria-controls={`detalhe-${s.id}`} onClick={() => setAberta(verDetalhe ? null : s.id)}>
+                    {titulo}
+                    <span className="t-ver">{verDetalhe ? 'Esconder descrição' : 'Ver descrição'}</span>
+                  </button>
+                  {andamento && <small className="andamento">{andamento}</small>}
+                </div>
                 <div className="st">
                   <span className={`badge ${st}`}>{STATUS_LABEL[st]}</span>
                   <span className="tempo">
@@ -93,6 +104,17 @@ export default function PainelClient({ eventos }) {
                   ? <button className="acao" onClick={() => pagar(s, true)}>Desfazer</button>
                   : st === 'escolhendo' ? null
                   : <button className="acao" onClick={() => pagar(s)}>Marcar como paga</button>}
+                {verDetalhe && (
+                  <div className="detalhe" id={`detalhe-${s.id}`}>
+                    {indices.map((v) => TRAVESSURAS[v] && (
+                      <div key={v} className="detalhe-item">
+                        {indices.length > 1 && <b>{TRAVESSURAS[v].titulo}</b>}
+                        <div className="modo"><small>No escritório</small><p>{TRAVESSURAS[v].escritorio}</p></div>
+                        <div className="modo"><small>De casa</small><p>{TRAVESSURAS[v].casa}</p></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

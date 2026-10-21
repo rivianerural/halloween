@@ -112,6 +112,12 @@ button, select, input { font: inherit; }
 .linha .who b { display: block; font-size: 17px; }
 .linha .who span { font-size: 14px; color: #5A4A30; }
 .linha .t { flex: 1 1 220px; min-width: 0; font-family: var(--creep); font-size: 28px; line-height: 1.05; color: var(--rust); }
+.t-btn { display: block; padding: 0; border: 0; background: none; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.t-ver { display: block; margin-top: 4px; font-family: var(--font-sans), system-ui, sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.detalhe { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 16px; padding-top: 4px; }
+.detalhe-item { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.detalhe-item b { font-size: 15px; }
+.linha .andamento { display: block; margin-top: 6px; font-family: var(--font-sans), system-ui, sans-serif; font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--sand-ink); }
 .linha .st { flex: 0 1 190px; display: flex; flex-direction: column; gap: 4px; }
 .badge { align-self: flex-start; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; }
 .badge.prazo { background: #DCEBDD; color: var(--green); }
