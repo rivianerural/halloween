@@ -37,7 +37,7 @@ Falta só copiar a chave: em **Project Settings → API Keys**, copie a **servic
 Abra o site, escolha o 3º Leilão Máxima Performance e confira se aparecem os 2 nomes da lanterna. Se aparecer um aviso de planilha inacessível, revise o passo 1.
 
 ## Como a planilha é lida
-O site procura, em cada aba de evento, o GMV realizado em **B2**, a meta em **B3** e a tabela a partir da **linha 12** (A Nome, C Palpite, D Diferença, E Posição, F Resultado). Quem tem "Travessura" na coluna F entra no sorteio. Se mudar o nome de uma aba ou a posição dessas células, ajuste `lib/eventos.js` ou `lib/sheet.js`.
+O site procura, em cada aba de evento, o GMV realizado em **B2**, a meta em **B3** e a tabela logo abaixo da linha com **Nome** na coluna A, em qualquer posição (A Nome, C Palpite, D Diferença, E Posição, F Resultado). Quem tem "Travessura" na coluna F entra no sorteio. Se mudar o nome de uma aba ou a posição dessas células, ajuste `lib/eventos.js` ou `lib/sheet.js`.
 
 ## Mudar as travessuras
 A lista fica em `lib/travessuras.js`. Para incluir uma nova, adicione no **fim** da lista, porque o banco guarda a posição de cada travessura.
