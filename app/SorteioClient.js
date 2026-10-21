@@ -6,6 +6,11 @@ import { prazoDe, contagem, dataHora } from '@/lib/tempo';
 
 const reduzMovimento = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Quem errou pela mesma diferença. A planilha desempata pondo na frente quem respondeu primeiro.
+const empatados = (ranking, p) => (p.posicao && p.diferenca
+  ? ranking.filter((o) => o.nome !== p.nome && o.posicao && o.diferenca === p.diferenca)
+  : []);
+
 export default function SorteioClient({ eventos }) {
   const [tela, setTela] = useState('escolher');
   const [slug, setSlug] = useState('');
@@ -89,6 +94,12 @@ export default function SorteioClient({ eventos }) {
   }
 
   const semResultado = dados && dados.lanterna.length === 0;
+  const ranking = dados?.ranking || [];
+  const temEmpate = ranking.some((p) => empatados(ranking, p).length > 0);
+  // Quem empatou com a lanterna e escapou da travessura por ter respondido antes.
+  const escaparam = (dados?.lanterna || [])
+    .flatMap((p) => empatados(ranking, p))
+    .filter((o, i, todos) => !dados.lanterna.some((l) => l.nome === o.nome) && todos.findIndex((x) => x.nome === o.nome) === i);
 
   return (
     <div className="wrap">
@@ -100,8 +111,8 @@ export default function SorteioClient({ eventos }) {
       <main className="hero">
         <div className="hero-text">
           <img className="titulo-img" src="/img/titulo.png" alt="Doçuras ou Travessuras" />
-          <p className="lede">Ficou na lanterna? Escolha seu nome e sorteie sua travessura.</p>
-          <p className="sub">Os 2 palpites mais distantes do GMV realizado de cada evento pagam uma travessura. Cada pessoa sorteia a sua e tem 24 horas para pagar.</p>
+          <p className="lede">Escolha o evento para ver os palpites e o ranking. Ficou na lanterna? Sorteie sua travessura.</p>
+          <p className="sub">Os 2 palpites mais próximos do GMV realizado ganham uma doçura e os 2 mais distantes pagam uma travessura. Quem fica na lanterna sorteia a sua e tem 24 horas para pagar.</p>
         </div>
 
         <section className="card" aria-live="polite">
@@ -138,6 +149,9 @@ export default function SorteioClient({ eventos }) {
                   </span>
                 </label>
               ))}
+              {escaparam.map((o) => (
+                <p key={o.nome} className="desempate">Empate: {o.nome} também errou por {o.diferenca}, mas ficou de fora porque respondeu primeiro ({o.carimbo}).</p>
+              ))}
             </div>
           )}
 
@@ -160,14 +174,16 @@ export default function SorteioClient({ eventos }) {
           <div className="palpites-head">
             <h2 id="palpites-titulo">Palpites e ranking</h2>
             <p>{evento.nome} | {dados.gmv ? `GMV realizado ${dados.gmv}` : `O ranking sai na apuração: ${evento.apuracao}.`}</p>
+            {temEmpate && <p className="desempate">Desempate: com a mesma diferença, fica na frente quem respondeu primeiro no formulário.</p>}
           </div>
           <ol className="ranking">
-            {dados.ranking.map((p, i) => (
+            {ranking.map((p, i) => (
               <li key={`${p.nome}-${i}`} className={`rank${p.resultado ? ` ${p.resultado}` : ''}`}>
                 <span className="pos">{p.posicao ? `${p.posicao}º` : '-'}</span>
                 <span className="rank-nome">
                   {p.nome}
                   {p.resultado && <span className={`tag ${p.resultado}`}>{p.resultado === 'docura' ? '🍬 Doçura' : '🦇 Travessura'}</span>}
+                  {empatados(ranking, p).length > 0 && <small className="rank-empate">Empate: respondeu {p.carimbo}</small>}
                 </span>
                 <span className="rank-num"><small>Palpite</small>{p.palpite || '-'}</span>
                 <span className="rank-num"><small>Errou por</small>{p.diferenca || '-'}</span>
