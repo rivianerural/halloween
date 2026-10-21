@@ -15,8 +15,16 @@ export default function SorteioClient({ eventos }) {
   const [pessoa, setPessoa] = useState('');
   const [sorteio, setSorteio] = useState(null);
   const [abertas, setAbertas] = useState(null);
+  const [verPalpites, setVerPalpites] = useState(false);
+  const palpitesRef = useRef(null);
 
   const evento = eventos.find((e) => e.slug === slug);
+
+  useEffect(() => {
+    const el = palpitesRef.current;
+    if (!verPalpites || !el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 24, behavior: reduzMovimento() ? 'auto' : 'smooth' });
+  }, [verPalpites]);
 
   useEffect(() => {
     fetch('/api/sorteios').then((r) => r.json()).then((j) => {
@@ -138,8 +146,36 @@ export default function SorteioClient({ eventos }) {
               {!meu ? 'Sortear minha travessura' : meu.travessura !== null ? 'Ver minha travessura' : 'Continuar meu sorteio'}
             </button>
           )}
+
+          {dados && dados.ranking?.length > 0 && (
+            <button className="ver" aria-expanded={verPalpites} aria-controls="palpites" onClick={() => setVerPalpites((v) => !v)}>
+              {verPalpites ? 'Esconder palpites' : `Ver palpites e ranking (${dados.ranking.length})`}
+            </button>
+          )}
         </section>
       </main>
+
+      {verPalpites && dados && dados.ranking?.length > 0 && (
+        <section className="palpites" id="palpites" ref={palpitesRef} aria-labelledby="palpites-titulo">
+          <div className="palpites-head">
+            <h2 id="palpites-titulo">Palpites e ranking</h2>
+            <p>{evento.nome} | {dados.gmv ? `GMV realizado ${dados.gmv}` : `O ranking sai na apuração: ${evento.apuracao}.`}</p>
+          </div>
+          <ol className="ranking">
+            {dados.ranking.map((p, i) => (
+              <li key={`${p.nome}-${i}`} className={`rank${p.resultado ? ` ${p.resultado}` : ''}`}>
+                <span className="pos">{p.posicao ? `${p.posicao}º` : '-'}</span>
+                <span className="rank-nome">
+                  {p.nome}
+                  {p.resultado && <span className={`tag ${p.resultado}`}>{p.resultado === 'docura' ? '🍬 Doçura' : '🦇 Travessura'}</span>}
+                </span>
+                <span className="rank-num"><small>Palpite</small>{p.palpite || '-'}</span>
+                <span className="rank-num"><small>Errou por</small>{p.diferenca || '-'}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
     </div>
   );
 }
