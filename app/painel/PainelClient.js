@@ -27,10 +27,10 @@ export default function PainelClient({ eventos }) {
     return () => { clearInterval(tick); clearInterval(refresh); };
   }, []);
 
-  async function pagar(s, desfazer = false) {
+  async function pagar(s, desfazer = false, travessura) {
     let pin = sessionStorage.getItem('pin');
     if (!pin) { pin = window.prompt('Senha para marcar como paga:'); if (!pin) return; }
-    const r = await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, pin, desfazer }) });
+    const r = await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, pin, desfazer, travessura }) });
     const j = await r.json();
     if (!r.ok) { sessionStorage.removeItem('pin'); window.alert(j.erro || 'Não deu certo.'); return; }
     sessionStorage.setItem('pin', pin);
@@ -81,9 +81,11 @@ export default function PainelClient({ eventos }) {
             const titulo = indices.map((v) => TRAVESSURAS[v]?.titulo).join(' ou ');
             const verDetalhe = aberta === s.id;
             // Enquanto não escolhe, deixa claro em que ponto do sorteio a pessoa parou.
-            const andamento = s.travessura !== null ? ''
-              : s.opcao_2 === null ? 'Sorteou 1 de 2: ainda pode confirmar essa ou sortear de novo.'
-              : 'Sorteou 2 de 2: falta escolher qual das duas vai pagar.';
+            const andamento = s.travessura !== null || st === 'paga' ? ''
+              : s.opcao_2 === null ? 'Sorteou 1 de 2: já conta no prazo com essa, mas ainda pode sortear de novo uma vez.'
+              : 'Sorteou 2 de 2: falta escolher qual das duas vai pagar. O prazo já está correndo.';
+            // Com duas opções e sem escolha, quem marca como paga precisa dizer qual foi.
+            const escolherAoPagar = s.travessura === null && indices.length > 1;
             return (
               <div className="linha" key={s.id}>
                 <div className="who"><b>{s.pessoa}</b><span>{nomeEvento(s.evento)}</span></div>
@@ -102,7 +104,7 @@ export default function PainelClient({ eventos }) {
                 </div>
                 {st === 'paga'
                   ? <button className="acao" onClick={() => pagar(s, true)}>Desfazer</button>
-                  : st === 'escolhendo' ? null
+                  : escolherAoPagar ? <button className="acao" onClick={() => setAberta(s.id)}>Marcar como paga</button>
                   : <button className="acao" onClick={() => pagar(s)}>Marcar como paga</button>}
                 {verDetalhe && (
                   <div className="detalhe" id={`detalhe-${s.id}`}>
@@ -111,6 +113,7 @@ export default function PainelClient({ eventos }) {
                         {indices.length > 1 && <b>{TRAVESSURAS[v].titulo}</b>}
                         <div className="modo"><small>No escritório</small><p>{TRAVESSURAS[v].escritorio}</p></div>
                         <div className="modo"><small>De casa</small><p>{TRAVESSURAS[v].casa}</p></div>
+                        {escolherAoPagar && st !== 'paga' && <button className="acao" onClick={() => pagar(s, false, v)}>Pagou esta</button>}
                       </div>
                     ))}
                   </div>
