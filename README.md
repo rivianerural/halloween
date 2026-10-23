@@ -4,7 +4,7 @@ Site do sorteio da campanha Doçuras ou Travessuras. Cada pessoa da lanterna esc
 
 - **Resultados automáticos:** o site lê a planilha de apuração a cada acesso. Preencheu o GMV realizado na aba Eventos, os nomes da lanterna já aparecem no site.
 - **Segunda chance:** cada pessoa sorteia no máximo 2 vezes e escolhe uma das duas. As 2 pessoas de um mesmo evento nunca tiram a mesma travessura.
-- **Painel (`/painel`):** mostra todas as travessuras sorteadas, com a contagem das 24h. Marcar como paga pede a senha definida em `ADMIN_PIN`.
+- **Painel (`/painel`):** mostra todas as travessuras sorteadas, com a contagem das 24h. Qualquer pessoa pode marcar como paga, sem senha (o painel pede só uma confirmação).
 
 ## Passo a passo para publicar
 
@@ -30,7 +30,6 @@ Falta só copiar a chave: em **Project Settings → API Keys**, copie a **servic
    - `SUPABASE_URL`: `https://vhvygwwvflptyouqnnnl.supabase.co`
    - `SUPABASE_SERVICE_ROLE_KEY`: a chave service_role ou secret
    - `GOOGLE_SHEET_ID`: `13G74uQKP-gQyFReCVzn9QsBxFvyA46hJ447r9HqwP0A`
-   - `ADMIN_PIN`: a senha para marcar travessuras como pagas
 4. Clique em **Deploy**. Em cerca de 1 minuto o site fica no ar num link `.vercel.app`.
 
 ### 5. Testar

@@ -28,12 +28,12 @@ export default function PainelClient({ eventos }) {
   }, []);
 
   async function pagar(s, desfazer = false, travessura) {
-    let pin = sessionStorage.getItem('pin');
-    if (!pin) { pin = window.prompt('Senha para marcar como paga:'); if (!pin) return; }
-    const r = await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, pin, desfazer, travessura }) });
+    // Sem senha, a confirmação evita marcar alguém sem querer.
+    const pergunta = desfazer ? `Voltar a travessura de ${s.pessoa} para em aberto?` : `Confirmar que ${s.pessoa} pagou a travessura?`;
+    if (!window.confirm(pergunta)) return;
+    const r = await fetch('/api/pagar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: s.id, desfazer, travessura }) });
     const j = await r.json();
-    if (!r.ok) { sessionStorage.removeItem('pin'); window.alert(j.erro || 'Não deu certo.'); return; }
-    sessionStorage.setItem('pin', pin);
+    if (!r.ok) { window.alert(j.erro || 'Não deu certo.'); return; }
     setLista((l) => l.map((x) => (x.id === s.id ? j.sorteio : x)));
   }
 

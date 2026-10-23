@@ -4,10 +4,9 @@ import { db } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req) {
-  const { id, pin, desfazer, travessura } = await req.json().catch(() => ({}));
-  if (!process.env.ADMIN_PIN || pin !== process.env.ADMIN_PIN) {
-    return NextResponse.json({ erro: 'Senha incorreta.' }, { status: 401 });
-  }
+  // Sem senha: qualquer pessoa do time pode marcar como paga pelo painel.
+  const { id, desfazer, travessura } = await req.json().catch(() => ({}));
+  if (!id) return NextResponse.json({ erro: 'Travessura não informada.' }, { status: 400 });
   try {
     let campos = { paga_em: desfazer ? null : new Date().toISOString() };
     if (!desfazer) {
